@@ -1,0 +1,21 @@
+Go to the page, the page hint that no one can find the "secret-directory" even Google
+
+=> Think of robots.txt. I even put the embeded youtube video of Mr.Robot theme for fun (Robot)
+
+Go to /robots.txt
+
+We'll see:
+    User-agent: *
+    Disallow: /flagflagflagflag
+    Disallow: /flagpassword
+
+Go to /flagflagflagflag and we see that it requires a username and password
+
+Go to /flagpassword it says that we must come from /flagflagflagflag
+
+But it should be impossible because we must have password first, but we can add Referer header when we move to /flagpassword
+
+The username = hcmus_society
+The password = youhavedonewellyoungone
+
+Put it to /flagflagflagflag and get the flag

@@ -1,0 +1,14 @@
+# docker-compose.yml
+version: '2'
+
+services:
+  web:
+    # build from Dockerfile
+    build: .
+    dockerfile: Dockerfile
+    ports:
+     - "5000:5000"
+    volumes:
+     - .:/baby
+  redis:
+    image: redis

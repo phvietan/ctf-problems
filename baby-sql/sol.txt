@@ -1,0 +1,5 @@
+Most simple sql injection
+
+username = admin
+
+password: ' or '1'='1
