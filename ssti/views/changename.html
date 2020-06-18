@@ -1,0 +1,27 @@
+<html>
+    <head>
+        <title>An - CBJS</title>
+    </head>
+    <body>
+        <a href="/">index</a>
+        <br/>
+        <a href="/upload">upload</a>
+        <br/>
+        <a href="/changename">changename</a>
+        <br/>
+        <a href="/gettoken">gettoken</a>
+        <br/>
+        <br/>
+
+        Hello, your current name is {{name}}
+
+        <form action="/changename">
+            <label for="name">Change your name</label>
+            <input type="text" id="name" name="name"><br><br>
+            <input type="submit" value="Submit">
+          </form>
+
+        Or change your name by get request: http://host:port/changename?name=something
+        
+    </body>
+</html>
