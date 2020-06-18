@@ -7,10 +7,6 @@ function getHMAC(key, val) {
     .digest('hex');
 }
 
-function getRandomNonce() {
-  return getHMAC(uuid(), uuid() + uuid());
-}
-
 module.exports = {
-  getHMAC, getRandomNonce,
+  getHMAC,
 }

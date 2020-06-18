@@ -8,7 +8,7 @@ const busboy = require('connect-busboy');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const uuid    = require('uuid').v4;
-const { getRandomNonce, getHMAC } = require('./helper.js');
+const { getHMAC } = require('./helper.js');
 
 const app = express();
 
@@ -18,8 +18,7 @@ app.use(bodyParser.json());
 
 // CSP
 app.use(function(req, res, next) {
-  res.locals.nonce = getRandomNonce()
-  res.setHeader("Content-Security-Policy", `script-src 'nonce-${res.locals.nonce}'`);
+  res.setHeader("Content-Security-Policy", `default-src 'none'`);
   return next();
 });
 
@@ -45,7 +44,7 @@ app.engine('html', function (filePath, options, callback) { // define the templa
       .replace(/{{referer}}/g, options.referer)
       .replace(/{{token}}/g, options.token)
       .replace(/{{name}}/g, options.name)
-      .replace(/{{nonce}}/g, options.nonce)
+      .replace(/{{nickname}}/g, options.nickname)
       .replace("{{comment}}", options.comment);
 
     return callback(null, rendered)
@@ -60,6 +59,9 @@ function handleUndefinedValue(req) {
     if (req.session.name == null || req.session.name == undefined) {
       req.session.name = "{{name}}";
     }
+    if (req.session.nickname == null || req.session.nickname == undefined) {
+      req.session.nickname = "{{nickname}}";
+    }
   }
   return req
 }
@@ -68,13 +70,12 @@ function handleUndefinedValue(req) {
 app.get('/', function(req, res) {
   req = handleUndefinedValue(req)
   res.render('index', {
-    nonce: res.locals.nonce,
     comment: `<!-- Developer note 1: Template parsing order
     var rendered = content.toString()
-  .replace(/{{referer}}/g, options.referer)
-  .replace(/{{token}}/g, options.token)
-  .replace(/{{name}}/g, options.name)
-  .replace(/{{nonce}}/g, options.nonce) -->
+      .replace(/{{referer}}/g, options.referer)
+      .replace(/{{token}}/g, options.token)
+      .replace(/{{name}}/g, options.name)
+      .replace(/{{nickname}}/g, options.nickname) -->
     
     <!-- Developer note 2: somehow the referer in /gettoken automatically decodeURI, why???
         TODO: Fix this
@@ -91,7 +92,6 @@ app.use(busboy());
 app.post('/upload', function(req, res) {
   console.log(req.headers['content-length'])
   if (req.headers['content-length'] > 1024) {
-    console.log('aaaa')
     res.send("Expected file size to be <= 1KB. <br/> <a href='/upload'>")
     return
   }
@@ -121,14 +121,20 @@ app.get('/changename', function(req, res) {
   if (req.query.name !== undefined) {
     req.session.name = req.query.name
   }
-  res.render('changename', { name: req.session.name } );
+  if (req.query.nickname !== undefined) {
+    req.session.nickname = req.query.nickname
+  }
+  res.render('changename', { name: req.session.name,  nickname: req.session.nickname } );
 });
 app.post('/changename', function(req, res) {
   req = handleUndefinedValue(req)
   if (req.body.name !== undefined) {
-    req.session.name = req.body.name
+    req.session.name = req.body.name;
   }
-  res.render('changename', { name: req.session.name } );
+  if (req.body.nickname !== undefined) {
+    req.session.nickname = req.body.nickname;
+  }
+  res.render('changename', { name: req.session.name, nickname: req.session.nickname } );
 });
 
 app.get('/gettoken', function(req, res) {
@@ -137,7 +143,7 @@ app.get('/gettoken', function(req, res) {
   const referer_dec = decodeURIComponent(referer);
 
   const token = getHMAC(secretSession, req.session.id);
-  res.render('gettoken', { referer: referer_dec, token, name: req.session.name });
+  res.render('gettoken', { referer: referer_dec, token, name: req.session.name, nickname: req.session.nickname });
 });
 
-app.listen(6666);
+app.listen(5555);

@@ -15,9 +15,17 @@
 
         Hello, your current name is {{name}}
 
-        <form action="/changename">
+        Your nick name is {{nickname}}
+
+        <form action="/changename" method="POST">
             <label for="name">Change your name</label>
             <input type="text" id="name" name="name"><br><br>
+            <input type="submit" value="Submit">
+          </form>
+
+          <form action="/changename" method="POST">
+            <label for="nickname">Change your nickname</label>
+            <input type="text" id="nickname" name="nickname"><br><br>
             <input type="submit" value="Submit">
           </form>
 
