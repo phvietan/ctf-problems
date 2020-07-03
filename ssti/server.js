@@ -22,6 +22,37 @@ app.use(function(req, res, next) {
   return next();
 });
 
+function handleUndefinedValue(req) {
+  if (!!req.session) {
+    if (req.session.name == null || req.session.name == undefined) {
+      req.session.name = "{{name}}";
+    }
+    if (req.session.nickname == null || req.session.nickname == undefined) {
+      req.session.nickname = "{{nickname}}";
+    }
+  }
+  return req
+}
+
+function handleType(req) {
+  if (!!req.session) {
+    if (typeof(req.session.name) != 'string') {
+      req.session.name = '';
+    }
+    if (typeof(req.session.nickname) != 'string') {
+      req.session.nickname = '';
+    }
+  }
+  return req;
+}
+
+// filter
+app.use(function(req, res, next) {
+  req = handleUndefinedValue(req);
+  req = handleType(req);
+  return next();
+});
+
 // Cookies 
 const secretSession = uuid() + uuid() + uuid();
 app.use(cookieParser());
@@ -54,18 +85,6 @@ app.engine('html', function (filePath, options, callback) { // define the templa
 app.set('views', './views') // specify the views directory
 app.set('view engine', 'html') // register the template engine
 
-function handleUndefinedValue(req) {
-  if (!!req.session) {
-    if (req.session.name == null || req.session.name == undefined) {
-      req.session.name = "{{name}}";
-    }
-    if (req.session.nickname == null || req.session.nickname == undefined) {
-      req.session.nickname = "{{nickname}}";
-    }
-  }
-  return req
-}
-
 // Routings
 app.get('/', function(req, res) {
   req = handleUndefinedValue(req)
@@ -86,13 +105,15 @@ app.get('/upload', function(req, res) {
 
 app.use(busboy());
 app.post('/upload', function(req, res) {
-  console.log(req.headers['content-length'])
   if (req.headers['content-length'] > 1024) {
     res.send("Expected file size to be <= 1KB. <br/> <a href='/upload'>")
     return
   }
   req.pipe(req.busboy);
   req.busboy.on('file', function (fieldname, file, filename) {
+    const nameOriginal = filename;
+    // console.log(filename);
+    // res.send(filename + '\n\n');
     filename = filename.replace(/\.\./g, '')
     filename = filename.replace(/\//g, '')
     if (filename.length === 0) {
@@ -104,7 +125,7 @@ app.post('/upload', function(req, res) {
       let fstream = fs.createWriteStream(path.join(__dirname, 'uploads', filename));
       file.pipe(fstream);
       fstream.on('close', function () {    
-        res.send("Upload Finished on /uploads/" + filename);
+        res.send(`Original name: ${nameOriginal}; Real Name: ${filename}; Upload Finished on /uploads/${filename}`);
       });
     } catch (err) {
       res.send("Something is wrong. <br/> <a href='/upload'>")
@@ -113,13 +134,17 @@ app.post('/upload', function(req, res) {
 });
 
 app.get('/changename', function(req, res) {
-  req = handleUndefinedValue(req)
   if (req.query.name !== undefined) {
     req.session.name = req.query.name
   }
   if (req.query.nickname !== undefined) {
     req.session.nickname = req.query.nickname
   }
+  req = handleUndefinedValue(req);
+  req = handleType(req);
+
+  console.log(req);
+
   res.render('changename', { name: req.session.name,  nickname: req.session.nickname } );
 });
 app.post('/changename', function(req, res) {
