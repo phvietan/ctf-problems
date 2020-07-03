@@ -18,7 +18,7 @@ app.use(bodyParser.json());
 
 // CSP
 app.use(function(req, res, next) {
-  res.setHeader("Content-Security-Policy", `default-src 'none'`);
+  res.setHeader("Content-Security-Policy", "script-src 'none'; object-src 'none';");
   return next();
 });
 
@@ -75,11 +75,7 @@ app.get('/', function(req, res) {
       .replace(/{{referer}}/g, options.referer)
       .replace(/{{token}}/g, options.token)
       .replace(/{{name}}/g, options.name)
-      .replace(/{{nickname}}/g, options.nickname) -->
-    
-    <!-- Developer note 2: somehow the referer in /gettoken automatically decodeURI, why???
-        TODO: Fix this
-    -->`,
+      .replace(/{{nickname}}/g, options.nickname) -->`
   });
 });
 
