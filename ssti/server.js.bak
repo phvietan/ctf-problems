@@ -16,6 +16,11 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+// CSP
+app.use(function(req, res, next) {
+  res.setHeader("Content-Security-Policy", "script-src 'none'; object-src 'none';");
+  return next();
+});
 
 function handleUndefinedValue(req) {
   if (!!req.session) {
